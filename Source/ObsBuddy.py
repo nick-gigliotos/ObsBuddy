@@ -45,6 +45,9 @@ def script_update(settings):
 def OnRecordingStart():
     if(DEBUG_MODE):
         print("It ran")
+        print("Imagine working. HAH!")
     if(ENABLED and obs. obs_frontend_recording_active()):
         print("Subsribe to ZardyZ")
+        print("Yeah do it punk")
         
+
