@@ -3,6 +3,8 @@
 #Obs module, Python will say it cant find it but if its ran in OBS it will work
 import obspython as obs
 
+#Test for commits
+
 #Global for debug messages
 DEBUG_MODE = True
 
