@@ -25,7 +25,7 @@ startTime = 0
 splitStartTime  = 0
 
 #Minimum split time (seconds)?
-MIN_SPLIT_TIME = 3
+MIN_SPLIT_TIME = 2
 
 #Global for how many splits
 splitCounter = 0
@@ -65,7 +65,6 @@ def script_update(settings):
 
     if (DEBUG_MODE): 
         print("Calling Update")
-        print(math.floor(time.time()))
 
     #Update value of enabled
     isEnabled = obs.obs_data_get_bool(settings, "enabled")
@@ -86,29 +85,23 @@ def onRecordingStart():
     global isRecording
     global startTime
     global splitCounter
-
-    if(DEBUG_MODE):
-        print("onRecordingStart Ran")
-        print(isRecording)
     
     if(isEnabled and obs.obs_frontend_recording_active() and not isRecording):
+        if DEBUG_MODE:
+            print("Timer Start")
         isRecording = True
         splitCounter = 0
         startTime = math.floor(time.time())
-        print("Timer Start")
-        print(startTime)
         
 
 def onRecordingEnd():
     global isRecording
     global startTime
 
-    if(DEBUG_MODE):
-        print("onRecordingEnd Ran")
-
     if(isEnabled and not obs.obs_frontend_recording_active() and isRecording):
+        if DEBUG_MODE:
+            print("Timer End")
         isRecording = False
-        print("Timer End")
 
 def handleSplits(isPressed):
     global startTime
@@ -119,14 +112,15 @@ def handleSplits(isPressed):
 
     if(isRecording and isEnabled and math.floor(time.time()) - offsetTimer > OFFSET):
         if(splitStartTime == 0):
+            if DEBUG_MODE:
+                print("Split started")
             splitStartTime = math.floor(time.time())
-            print("Split started", splitStartTime)
             offsetTimer = 0
         else:
             endTime =  math.floor(time.time()) - splitStartTime
-            print(endTime)
             if(endTime > MIN_SPLIT_TIME):
-                print("Split ended")
+                if DEBUG_MODE:
+                    print("Split ended")
                 splitCounter += 1
                 saveTimes(splitStartTime - startTime, endTime)
                 splitStartTime = 0
@@ -140,12 +134,10 @@ def saveTimes(startTime, endTime):
 
     currentDirectory = os.getcwd()
     os.chdir(os.path.dirname(__file__))
-    print(os.getcwd())
     savePath = os.path.relpath('..\\Splits\\splits.txt', os.path.dirname(__file__))
     file = io.open(savePath, "a+")
     file.write("Split" + str(splitCounter) + ": Start time-" + str(startTime) + " End time-" + str(endTime) + "\n")
     file.close()
     os.chdir(currentDirectory)
-    print(os.getcwd())
 
 
