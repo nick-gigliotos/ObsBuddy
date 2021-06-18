@@ -43,7 +43,7 @@ def script_load(settings):
 
     obs.obs_data_set_bool(settings, "enabled", False)
     obs.obs_data_set_bool(settings, "debugMode", False)
-    obs.obs_hotkey_register_frontend("bsdjhgbsdkjhgbjhgb", "fvhvnvgnvn", handleSplits)
+    obs.obs_hotkey_register_frontend("splitHotkey", "Split Hotkey", handleSplits)
 
 #Creats the enabled property when the script is instanited
 def script_properties():
@@ -65,12 +65,11 @@ def script_update(settings):
 
     if (DEBUG_MODE): 
         print("Calling Update")
+        print("isEnabled:", isEnabled)
 
     #Update value of enabled
     isEnabled = obs.obs_data_get_bool(settings, "enabled")
     DEBUG_MODE = obs.obs_data_get_bool(settings, "debugMode")
-
-    print(isEnabled)
 
     #Add or remove functions based on whether the script is enabled
     if(isEnabled):
