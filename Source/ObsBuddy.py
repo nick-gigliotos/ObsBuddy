@@ -40,6 +40,7 @@ offsetTimer = 0
 def script_load(settings):
     if (DEBUG_MODE): 
         print("Calling Load")
+        print("github sucks")
 
     obs.obs_data_set_bool(settings, "enabled", False)
     obs.obs_data_set_bool(settings, "debugMode", False)
