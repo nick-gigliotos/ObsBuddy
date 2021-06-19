@@ -80,7 +80,7 @@ def script_update(settings):
         obs.timer_remove(onRecordingEnd)
 
 #If OBS is recording and this script is Enabled. Print Something.
-def onRecordingStart():
+def on_recording_start():
     global isRecording
     global startTime
     global splitCounter
