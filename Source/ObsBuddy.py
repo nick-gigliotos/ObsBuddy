@@ -122,7 +122,7 @@ def handle_splits(isPressed):
                 if DEBUG_MODE:
                     print("Split ended")
                 splitCounter += 1
-                save_times(splitStartTime - startTime, endTime)
+                save_times(splitStartTime - startTime, splitStartTime - startTime + endTime)
                 splitStartTime = 0
                 offsetTimer = math.floor(time.time())
             
