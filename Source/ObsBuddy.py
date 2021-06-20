@@ -44,7 +44,7 @@ def script_load(settings):
 
     obs.obs_data_set_bool(settings, "enabled", False)
     obs.obs_data_set_bool(settings, "debugMode", False)
-    obs.obs_hotkey_register_frontend("splitHotkey", "Split Hotkey", handleSplits)
+    obs.obs_hotkey_register_frontend("splitHotkey", "Split Hotkey", handle_splits)
 
 #Creats the enabled property when the script is instanited
 def script_properties():
@@ -64,24 +64,24 @@ def script_update(settings):
     global isEnabled
     global DEBUG_MODE
 
-    if (DEBUG_MODE): 
-        print("Calling Update")
-        print("isEnabled:", isEnabled)
-
     #Update value of enabled
     isEnabled = obs.obs_data_get_bool(settings, "enabled")
     DEBUG_MODE = obs.obs_data_get_bool(settings, "debugMode")
 
+    if (DEBUG_MODE): 
+        print("Calling Update")
+        print("isEnabled:", isEnabled)
+
     #Add or remove functions based on whether the script is enabled
     if(isEnabled):
-        obs.timer_add(onRecordingStart, 1000)
-        obs.timer_add(onRecordingEnd, 100)
+        obs.timer_add(on_recording_start, 1000)
+        obs.timer_add(on_recording_end, 100)
     else:
-        obs.timer_remove(onRecordingStart)
-        obs.timer_remove(onRecordingEnd)
+        obs.timer_remove(on_recording_start)
+        obs.timer_remove(on_recording_end)
 
 #If OBS is recording and this script is Enabled. Print Something.
-def onRecordingStart():
+def on_recording_start():
     global isRecording
     global startTime
     global splitCounter
@@ -94,7 +94,7 @@ def onRecordingStart():
         startTime = math.floor(time.time())
         
 
-def onRecordingEnd():
+def on_recording_end():
     global isRecording
     global startTime
 
@@ -103,7 +103,7 @@ def onRecordingEnd():
             print("Timer End")
         isRecording = False
 
-def handleSplits(isPressed):
+def handle_splits(isPressed):
     global startTime
     global splitStartTime
     global isRecording
@@ -122,22 +122,43 @@ def handleSplits(isPressed):
                 if DEBUG_MODE:
                     print("Split ended")
                 splitCounter += 1
-                saveTimes(splitStartTime - startTime, endTime)
+                save_times(splitStartTime - startTime, endTime)
                 splitStartTime = 0
                 offsetTimer = math.floor(time.time())
             
 
 
 #CONFUSING VARIABLE NAMES. FIX??
-def saveTimes(startTime, endTime):
+def save_times(startTime, endTime):
     global splitCounter
 
+    startTime = format_time(startTime)
+    endTime = format_time(endTime)
     currentDirectory = os.getcwd()
     os.chdir(os.path.dirname(__file__))
     savePath = os.path.relpath('..\\Splits\\splits.txt', os.path.dirname(__file__))
     file = io.open(savePath, "a+")
-    file.write("Split" + str(splitCounter) + ": Start time-" + str(startTime) + " End time-" + str(endTime) + "\n")
+    file.write("Split" + str(splitCounter) + ": " + startTime + ":" + endTime + "\n")
     file.close()
     os.chdir(currentDirectory)
 
+def format_time(timeToFormat):
+    hours = timeToFormat//3600
+    timeToFormat -= hours * 3600
+    minutes  = timeToFormat//60
+    timeToFormat -= minutes * 60
+
+    hoursTensDigit = ""
+    minutesTensDigit = ""
+    secondsTensDigit = ""
+
+    if(hours < 10):
+        hoursTensDigit = "0"
+    if(minutes < 10):
+        minutesTensDigit = "0"
+    if(timeToFormat < 10):
+        secondsTensDigit = "0"
+
+    formattedTime = hoursTensDigit + str(hours) + ":" + minutesTensDigit + str(minutes) + ":" + secondsTensDigit +  str(timeToFormat)
+    return formattedTime
 
