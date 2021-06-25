@@ -13,6 +13,9 @@ import os
 #Global for debug messages
 DEBUG_MODE = False
 
+#Constant for rewinds capture time
+REWIND_CAPTURE_TIME = 30
+
 #Global for whether the script is enabled because the obs call for that is long
 isEnabled = False
 
@@ -35,6 +38,7 @@ splitCounter = 0
 #FROM THE KEY UP. THIS MEANS IT IS IMPOSSIBLE TO START A SPLIT 3 SECONDS AFTER ENDING ONE.
 OFFSET = 3
 offsetTimer = 0
+rewindOffsetTimer = 0
 
 #OBS function, loads script. Sets enabled to false on load.
 def script_load(settings):
@@ -44,6 +48,7 @@ def script_load(settings):
 
     obs.obs_data_set_bool(settings, "enabled", False)
     obs.obs_data_set_bool(settings, "debugMode", False)
+    obs.obs_hotkey_register_frontend("rewindHotkey", "Rewind Hotkey", rewind)
     obs.obs_hotkey_register_frontend("splitHotkey", "Split Hotkey", handle_splits)
 
 #Creats the enabled property when the script is instanited
@@ -53,7 +58,6 @@ def script_properties():
         
     props = obs.obs_properties_create()
     obs.obs_properties_add_bool(props, "enabled", "Enabled")
-    obs.obs_properties_add_path(props, "filePath", "File Path", obs.OBS_PATH_DIRECTORY, None, None)
     obs.obs_properties_add_bool(props, "debugMode", "Debug Mode")
     
     return props
@@ -128,11 +132,11 @@ def handle_splits(isPressed):
             
 
 
-#CONFUSING VARIABLE NAMES. FIX??
-def save_times(startTime, endTime):
+
+def save_times(beginTime, endTime):
     global splitCounter
 
-    startTime = format_time(startTime)
+    startTime = format_time(beginTime)
     endTime = format_time(endTime)
     currentDirectory = os.getcwd()
     os.chdir(os.path.dirname(__file__))
@@ -161,4 +165,23 @@ def format_time(timeToFormat):
 
     formattedTime = hoursTensDigit + str(hours) + ":" + minutesTensDigit + str(minutes) + ":" + secondsTensDigit +  str(timeToFormat)
     return formattedTime
+
+def rewind(isPressed):
+    global startTime
+    global splitCounter
+    global rewindOffsetTimer
+
+    if(DEBUG_MODE):
+        print("Rewind ran")
+
+    currentTime = math.floor(time.time()) - startTime
+    beginTime = 0
+    if(currentTime > REWIND_CAPTURE_TIME):
+        beginTime = currentTime - REWIND_CAPTURE_TIME
+
+    if(math.floor(time.time()) - rewindOffsetTimer > OFFSET):
+        splitCounter += 1
+        save_times(beginTime, currentTime)
+        rewindOffsetTimer = math.floor(time.time())
+
 
