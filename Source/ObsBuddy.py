@@ -38,6 +38,7 @@ splitCounter = 0
 #FROM THE KEY UP. THIS MEANS IT IS IMPOSSIBLE TO START A SPLIT 3 SECONDS AFTER ENDING ONE.
 OFFSET = 3
 offsetTimer = 0
+rewindOffsetTimer = 0
 
 #OBS function, loads script. Sets enabled to false on load.
 def script_load(settings):
@@ -167,12 +168,20 @@ def format_time(timeToFormat):
 
 def rewind(isPressed):
     global startTime
+    global splitCounter
+    global rewindOffsetTimer
+
+    if(DEBUG_MODE):
+        print("Rewind ran")
 
     currentTime = math.floor(time.time()) - startTime
     beginTime = 0
     if(currentTime > REWIND_CAPTURE_TIME):
         beginTime = currentTime - REWIND_CAPTURE_TIME
 
-    save_times(beginTime, currentTime)
+    if(math.floor(time.time()) - rewindOffsetTimer > OFFSET):
+        splitCounter += 1
+        save_times(beginTime, currentTime)
+        rewindOffsetTimer = math.floor(time.time())
 
 
