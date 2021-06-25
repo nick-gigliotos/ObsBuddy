@@ -1,5 +1,7 @@
 import PySimpleGUI as sg
 
+import os
+
 ## Was built at work and couldn't test
 ## Will implement OBSBuddy support ASAP
 #import ObsBuddy
@@ -72,7 +74,6 @@ def get_settings_layout():
     2. Splits
     3. Output
     '''
-    #global settings_data
     
     header_pad = ((5,5),(1,1))
     settings_sections = [[sg.Button('General',key='general_s',size=(15,1),pad=header_pad)],
@@ -118,7 +119,7 @@ def get_splitting_layout():
 ## Combines all layouts into one universal layout via frames
 def get_combined_layout():
     '''Combines the main_layout,settings_layout, and splitting_layout'''
-    layout = [[sg.Image(filename='rsz_obs_icon.png',pad=no_pad),sg.Text('BS Buddy V.1',font=('Times New Roman', 40),pad=no_pad)],
+    layout = [[sg.Image(filename=str(os.path.dirname(os.path.realpath(__file__)))+'\\rsz_obs_icon.png',pad=no_pad),sg.Text('BS Buddy V.1',font=('Times New Roman', 40),pad=no_pad)],
               [sg.Frame(None,layout=get_main_layout(),key='main_frame',element_justification='c', border_width=0,visible=True),
                sg.Frame(None,layout=get_settings_layout(),key='settings_frame',element_justification='c', border_width=0,visible=False),
                sg.Frame(None,layout=get_splitting_layout(),key='splitting_frame',element_justification='c', border_width=0,visible=False)]]
