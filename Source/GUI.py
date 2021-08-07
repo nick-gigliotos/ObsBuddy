@@ -1,14 +1,11 @@
 import PySimpleGUI as sg
 
-import os
-
-## Was built at work and couldn't test
-## Will implement OBSBuddy support ASAP
 #import ObsBuddy
+from Settings import Settings
 
 import time
 
-## Obs Theme (Need to put into function)
+
 obs_theme ={ "BACKGROUND": "#3a393a",
                 "TEXT": "WHITE",
                 "INPUT": "#464546",
@@ -74,6 +71,7 @@ def get_settings_layout():
     2. Splits
     3. Output
     '''
+    global settings_data
     
     header_pad = ((5,5),(1,1))
     settings_sections = [[sg.Button('General',key='general_s',size=(15,1),pad=header_pad)],
@@ -81,17 +79,17 @@ def get_settings_layout():
                      [sg.Button('Output',key='output_s',size=(15,1),pad=header_pad)]]
 
     general_frame = [[sg.Text('General')],
-                     [sg.Checkbox('Disable Split Popup after recording',default=True,key='split_popup')]]
+                     [sg.Checkbox('Disable Split Popup after recording',default=settings.data['general']['split_popup'],key='split_popup')]]
 
     split_frame =  [[sg.Text('Split Settings')],
-                    [sg.Text('Start/End Split'),sg.Input(key='split_hotkey',default_text='s')],
-                    [sg.Text('Create "Rewind" Split'), sg.Input(key='rewind_hotkey',default_text='r')],
-                    [sg.Text('Seconds to "Rewind"'), sg.Input(key='rewind_seconds',default_text='60')]]
+                    [sg.Text('Start/End Split'),sg.Input(key='split_hotkey',default_text=settings.data['split']['split_hotkey'])],
+                    [sg.Text('Create "Rewind" Split'), sg.Input(key='rewind_hotkey',default_text=settings.data['split']['rewind_hotkey'])],
+                    [sg.Text('Seconds to "Rewind"'), sg.Input(key='rewind_seconds',default_text=settings.data['split']['rewind_seconds'])]]
 
 
     output_frame = [[sg.Text('Output Settings')],
-                    [sg.Text('Default Project Name:'),sg.Input(key='project_name',default_text='Insert Cool Video Name Here')],
-                    [sg.Text('Default Project Location:'),sg.Input(key='project_path',default_text='Subscribe to Zardy Z'),sg.FileBrowse()]]
+                    [sg.Text('Default Project Name:'),sg.Input(key='project_name',default_text=settings.data['output']['project_name'])],
+                    [sg.Text('Default Project Location:'),sg.Input(key='project_path',default_text=settings.data['output']['project_path']),sg.FileBrowse()]]
                     
 
     settings_layout = [[sg.Text('Settings',font=('Times New Roman', 30))],
@@ -119,7 +117,7 @@ def get_splitting_layout():
 ## Combines all layouts into one universal layout via frames
 def get_combined_layout():
     '''Combines the main_layout,settings_layout, and splitting_layout'''
-    layout = [[sg.Image(filename=str(os.path.dirname(os.path.realpath(__file__)))+'\\rsz_obs_icon.png',pad=no_pad),sg.Text('BS Buddy V.1',font=('Times New Roman', 40),pad=no_pad)],
+    layout = [[sg.Image(filename='rsz_obs_icon.png',pad=no_pad),sg.Text('BS Buddy V.1',font=('Times New Roman', 40),pad=no_pad)],
               [sg.Frame(None,layout=get_main_layout(),key='main_frame',element_justification='c', border_width=0,visible=True),
                sg.Frame(None,layout=get_settings_layout(),key='settings_frame',element_justification='c', border_width=0,visible=False),
                sg.Frame(None,layout=get_splitting_layout(),key='splitting_frame',element_justification='c', border_width=0,visible=False)]]
@@ -137,6 +135,7 @@ def change_rec_button(window):
         starting_time = int(round(time.time()*100))
         window.FindElement('settings').Update(disabled=True)
         window.FindElement('split_video').Update(disabled=True)
+        #window.FindElement('timer_buttons').Update(visible=True)
         window['timer_buttons'].unhide_row()
         return True, starting_time
     elif window['rec_status'].get_text() == 'Stop Recording':
@@ -144,8 +143,12 @@ def change_rec_button(window):
         window.FindElement('timer').Update(text_color='green')
         window.FindElement('settings').Update(disabled=False)
         window.FindElement('split_video').Update(disabled=False)
+        #window.FindElement('timer_buttons').Update(visible=False)
         window['timer_buttons'].hide_row()
-        return False, split_popup()
+        if settings.data['general']['split_popup'] == False:
+            return False, 'No'
+        else:
+            return False, split_popup()
 
 def change_split_button(window):
     '''Updates the split button and displays text.
@@ -159,7 +162,7 @@ def change_split_button(window):
     elif window['split_status'].get_text() == 'Stop Split':
         window.FindElement('split_status').Update(text='Start Split')
         window.FindElement('timer').Update(text_color='red')
-        window.FindElement('split_text').Update(value='Split Ended at: '+str(format_time(int(round(time.time()*100)) - starting_time)),text_color='red')
+        window.FindElement('split_text').Update(value='Split Ended at: '+str(format_time(int(round(time.time()*100)) - starting_time)),text_color='blue')
         return False, int(round(time.time()*100))
 
 def rewind_button(window):
@@ -177,6 +180,7 @@ def update_frames(visual_states,window):
     for k,v in visual_states.items():
         window.FindElement(k).Update(visible=v)
 
+settings = Settings()
 window = get_combined_layout()
 rec_status = False
 split_status = False
@@ -192,22 +196,25 @@ while True:
         #rec_status = True
     if rec_status == True:
         current_time = int(round(time.time()*100)) - starting_time
+
         if rewind_status == True:
             if int(round(time.time()*100))-last_rsplit_time >= 300:
                 window.FindElement('split_status').Update(disabled=False)
                 window.FindElement('rewind_split').Update(disabled=False)
                 window.FindElement('split_text').Update(value='')
+                print('here')
                 if split_status == True:
                     window.FindElement('timer').Update(text_color='blue')
                 else:
+                    print('here')
                     window.FindElement('timer').Update(text_color='red')
                 rewind_status = False
+                
         elif split_status == True:
             if int(round(time.time()*100))-last_split_time >= 300:
                 window.FindElement('split_status').Update(disabled=False)
                 window.FindElement('rewind_split').Update(disabled=False)
                 window.FindElement('split_text').Update(value='')
-                
         else:
             if int(round(time.time()*100))-last_split_time >= 300:
                 window.FindElement('split_text').Update(value='')
@@ -222,7 +229,7 @@ while True:
             
     elif event == 'split_status':
         split_status, last_split_time = change_split_button(window)
-        print(last_split_time)
+        #print(last_split_time)
 
     elif event == 'rewind_split':
         rewind_status, last_rsplit_time = rewind_button(window)
@@ -238,7 +245,8 @@ while True:
     elif event == 'output_s':
         update_frames({'general_frame':False,'split_frame':False,'output_frame':True},window)
     elif event == 'settings_ok' or event =='settings_apply':
-        print(values)
+        #print(values)
+        settings.update_settings(values)
         update_frames({'main_frame':True,'settings_frame':False,'splitting_frame':False},window)
     elif event == 'settings_cancel':
         # Don't save Settings to text document
@@ -254,5 +262,3 @@ while True:
 
 
     window.FindElement('timer').update(value='{:02d}:{:02d}.{:02d}'.format((current_time // 100) // 60, (current_time // 100) % 60, current_time % 100))
-        
-            
