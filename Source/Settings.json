@@ -1,0 +1,14 @@
+{
+    "general": {
+        "split_popup": false
+    },
+    "split": {
+        "split_hotkey": "q",
+        "rewind_hotkey": "r",
+        "rewind_seconds": "60"
+    },
+    "output": {
+        "project_name": "Insert Cool Video Name Here",
+        "project_path": "Subscribe to Zardy Z"
+    }
+}
