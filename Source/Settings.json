@@ -3,12 +3,11 @@
         "split_popup": false
     },
     "split": {
-        "split_hotkey": "q",
-        "rewind_hotkey": "r",
-        "rewind_seconds": "60"
+        "rewind_seconds": "30"
     },
     "output": {
-        "project_name": "Insert Cool Video Name Here",
-        "project_path": "Subscribe to Zardy Z"
+        "video_title": "default",
+        "video_path": "E:/ObsBuddy/ObsBuddy/Splits/",
+        "obs_save_path": "E:/Recordings/Testing"
     }
 }
