@@ -197,20 +197,22 @@ def rewind(isPressed):
     global startTime
     global splitCounter
     global rewindOffsetTimer
+    global isEnabled
+    global isRecording
 
-    if(DEBUG_MODE):
-        print("Rewind ran")
+    if(isRecording and isEnabled):
+        if(DEBUG_MODE):
+            print("Rewind ran")
+        rewindTime = int(Settings.get_settings().get("split").get("rewind_seconds"))
+        currentTime = math.floor(time.time()) - startTime
+        beginTime = 0
+        if(currentTime > rewindTime):
+            beginTime = currentTime - rewindTime
 
-    rewindTime = int(Settings.get_settings().get("split").get("rewind_seconds"))
-    currentTime = math.floor(time.time()) - startTime
-    beginTime = 0
-    if(currentTime > rewindTime):
-        beginTime = currentTime - rewindTime
-
-    if(math.floor(time.time()) - rewindOffsetTimer > OFFSET):
-        splitCounter += 1
-        save_times(beginTime, currentTime)
-        rewindOffsetTimer = math.floor(time.time())
+        if(math.floor(time.time()) - rewindOffsetTimer > OFFSET):
+            splitCounter += 1
+            save_times(beginTime, currentTime)
+            rewindOffsetTimer = math.floor(time.time())
 
 def getVideoName():
     global videoNameTimes

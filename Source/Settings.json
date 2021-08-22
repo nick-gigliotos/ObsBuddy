@@ -3,8 +3,6 @@
         "split_popup": false
     },
     "split": {
-        "split_hotkey": "q",
-        "rewind_hotkey": "r",
         "rewind_seconds": "30"
     },
     "output": {
